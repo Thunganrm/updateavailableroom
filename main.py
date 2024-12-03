@@ -6,7 +6,6 @@ import pandas as pd
 from playwright.async_api import async_playwright
 import itertools
 from flask import Flask, jsonify, send_file, render_template_string
-import threading
 
 app = Flask(__name__)
 
