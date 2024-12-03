@@ -6,6 +6,7 @@ import pandas as pd
 from playwright.async_api import async_playwright
 import itertools
 from flask import Flask, jsonify, send_file, render_template_string
+import threading
 
 app = Flask(__name__)
 
@@ -162,7 +163,8 @@ def run_update_data():
     global result_df
     print(result_df,"result_df")
 
-    asyncio.run(update_data())
+    threading.Thread(target=update_data).start()
+
     result_html = result_df.to_html(classes='table table-bordered table-striped', index=False)
 
     # Render kết quả dưới dạng HTML
