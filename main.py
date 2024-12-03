@@ -158,31 +158,31 @@ async def update_data():
 
 result_df=0
 
-@app.route('/', methods=['GET'])
+@app.route("/", methods=["GET"])
 def run_update_data():
     global result_df
-    print(result_df,"result_df")
+    print("Starting data update...")  # Log message
+    try:
+        asyncio.run(update_data())
+        result_html = result_df.to_html(classes='table table-bordered table-striped', index=False)
+        return render_template_string("""
+            <html>
+                <head>
+                    <title>Hotel Room Availability</title>
+                    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+                </head>
+                <body>
+                    <div class="container">
+                        <h2>Hotel Room Availability</h2>
+                        {{ result_html|safe }}
+                    </div>
+                </body>
+            </html>
+        """, result_html=result_html)
+    except Exception as e:
+        print(f"Error during data update: {e}")  # Log error
+        return "Error occurred while processing the data."
 
-    threading.Thread(target=update_data).start()
-
-    result_html = result_df.to_html(classes='table table-bordered table-striped', index=False)
-
-    # Render kết quả dưới dạng HTML
-    return render_template_string("""
-        <html>
-            <head>
-                <title>Hotel Room Availability</title>
-                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
-            </head>
-            <body>
-                <div class="container">
-                    <h2>Hote
-                    l Room Availability</h2>
-                    {{ result_html|safe }}
-                </div>
-            </body>
-        </html>
-    """, result_html=result_html)
 
 
 if __name__ == "__main__":
