@@ -31,20 +31,19 @@ services:
     healthCheckPath: /
     region: oregon
 
-  # Cron job for Playwright automation (tạm thời bỏ qua nếu không cần thiết)
-  # - type: cron
-  #   name: playwright-cron-job
-  #   runtime: python
-  #   schedule: "0 * * * *" # Chạy mỗi giờ
-  #   buildCommand: true
-  #   startCommand: python automate.py # Lệnh để chạy tự động hóa
-  #   repo: https://github.com/your-repo # Repo chứa mã nguồn của bạn
-services:
+  # Web service for Python Flask app (main.py)
   - type: web
-    name: app
+    name: flask-app
     env: python
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn main:app
+    autoDeploy: true
+    scaling:
+      minInstances: 1
+      maxInstances: 3
+      targetCPUPercent: 60
+    healthCheckPath: /
+    region: oregon
 
 # Define databases here
 databases:
