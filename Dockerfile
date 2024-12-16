@@ -25,8 +25,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Cài đặt Playwright và các trình duyệt cần thiết
-RUN playwright install 
-
+build -t playwright-chrome .
+docker run -it playwright-chrome
 # Sao chép mã nguồn ứng dụng
 COPY app.py .
 
