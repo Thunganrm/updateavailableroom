@@ -2,24 +2,23 @@ import asyncio
 import json
 import requests
 from datetime import datetime, timedelta
-import pandas as pd
 from playwright.async_api import async_playwright
 import itertools
 from flask import Flask, jsonify, send_file, render_template_string
+import polars as pl
 
 app = Flask(__name__)
 
 # Hàm cập nhật dữ liệu
+
 async def update_data():
     global result_df
     async def main():
-        global hotel_responses,result_df
+        global hotel_responses, result_df
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
-  # Chế độ headless
             page = await browser.new_page()
 
-            # Truy cập trang đăng nhập
             await page.goto("https://id.bluejaypms.com/login")
             await page.select_option("select[name='ddlLangCode']", "vi-VN")
             await page.fill("input[name='txtEmail']", "ngan.lalahouse@gmail.com")
@@ -27,24 +26,19 @@ async def update_data():
             await page.click("a#lkLogin")
             await page.wait_for_timeout(5000)
 
-            # Lấy cookies sau khi đăng nhập
             await page.wait_for_selector("#lvHotels_lbtNameHotel_0")
             await page.click("#lvHotels_lbtNameHotel_0")
             await page.wait_for_timeout(5000)
 
             cookies = await page.context.cookies()
-            print(cookies)
-
             keys_to_keep = [
                 "ASP.NET_SessionId", "HtLanguage", "HtToken", "HtHotelId", "HtBaseDir"
             ]
             filtered_cookies = [cookie for cookie in cookies if cookie['name'] in keys_to_keep]
 
-            # Thay đổi giá trị của HtHotelId
             new_ht_hotel_id_list = ["5998", "6001", "6062"]
             hotel_responses = []
 
-            # Lặp qua danh sách khách sạn và gửi yêu cầu POST
             for new_ht_hotel_id in new_ht_hotel_id_list:
                 for i, cookie in enumerate(filtered_cookies):
                     if cookie['name'] == 'HtHotelId':
@@ -62,108 +56,124 @@ async def update_data():
                 }
 
                 data = [
-                    {"Action": "UpdateAvail", "RoomTypeId": "9197", "FromDate": "2024-12-02", "ToDate": "2024-12-05"},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9198", "FromDate": "2024-12-02", "ToDate": "2024-12-05"},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9199", "FromDate": "2024-12-02", "ToDate": "2024-12-05"},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9207", "FromDate": "2024-12-02", "ToDate": "2024-12-05"},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9208", "FromDate": "2024-12-02", "ToDate": "2024-12-05"},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9206", "FromDate": "2024-12-02", "ToDate": "2024-12-05"},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9555", "FromDate": "2024-12-02", "ToDate": "2024-12-05"},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9556", "FromDate": "2024-12-02", "ToDate": "2024-12-05"},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9557", "FromDate": "2024-12-02", "ToDate": "2024-12-05"},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9558", "FromDate": "2024-12-02", "ToDate": "2024-12-05"},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9559", "FromDate": "2024-12-02", "ToDate": "2024-12-05"},
+                    {"Action": "UpdateAvail", "RoomTypeId": "9197", "FromDate": "2024-12-15", "ToDate": "2024-12-21"},
+                    {"Action": "UpdateAvail", "RoomTypeId": "9198", "FromDate": "2024-12-15", "ToDate": "2024-12-21"},
+                    # Thêm các dữ liệu phòng khác
                 ]
 
                 json_data = json.dumps(data)
                 response = requests.post(url, headers=headers, data=json_data)
-                print(f"Response for hotel ID {new_ht_hotel_id}: {response.text}")
-
                 if response.status_code == 200:
-                    hotel = response.json()
-                    hotel_responses.append(hotel)
-                else:
-                    print(f"Request failed for hotel ID {new_ht_hotel_id} with status code: {response.status_code}")
+                    hotel_responses.append(response.json())
 
             await browser.close()
 
-        # Xử lý dữ liệu và tạo DataFrame
         bt = list(itertools.chain.from_iterable(hotel_responses))
 
+        # Dữ liệu phòng và khách sạn
         rooms_data = [
-            {"RoomType_Id": "9206", "room_name": "Deluxe Double Room"},
-            {"RoomType_Id": "9207", "room_name": "King room with garden view"},
-            {"RoomType_Id": "9208", "room_name": "King room with Balcony"},
             {"RoomType_Id": "9197", "room_name": "Deluxe Double Room"},
             {"RoomType_Id": "9198", "room_name": "King room with garden view"},
-            {"RoomType_Id": "9199", "room_name": "King room with Balcony"},
-            {"RoomType_Id": "9555", "room_name": "Superior"},
-            {"RoomType_Id": "9556", "room_name": "Deluxe"},
-            {"RoomType_Id": "9557", "room_name": "Luxury"},
-            {"RoomType_Id": "9558", "room_name": "Queen"},
-            {"RoomType_Id": "9559", "room_name": "Standard"},
+            # Thêm các phòng khác
         ]
+        rooms_df = pl.DataFrame(rooms_data)
 
-        rooms_df = pd.DataFrame(rooms_data)
         hotels_data = [
             {"HotelId": "6001", "hotel_name": "Ben Thanh Inn"},
             {"HotelId": "5998", "hotel_name": "Elegant Feel Inn"},
             {"HotelId": "6062", "hotel_name": "MG Daisy"},
         ]
-        hotels_df = pd.DataFrame(hotels_data)
+        hotels_df = pl.DataFrame(hotels_data)
 
-        df = pd.DataFrame(bt)
-        print(df)
+        df = pl.DataFrame(bt)
+        print(df.columns)
 
-        df['SellFrom'] = df['SellFrom'].apply(lambda x: datetime.strptime(x.replace('T', ' ').split('.')[0], '%Y-%m-%d %H:%M:%S'))
-        df['SellTo'] = df['SellTo'].apply(lambda x: datetime.strptime(x.replace('T', ' ').split('.')[0], '%Y-%m-%d %H:%M:%S'))
 
         start_date = datetime.today()
         end_date = start_date + timedelta(days=6)
-        date_range = pd.date_range(start=start_date, end=end_date).strftime('%Y-%m-%d').tolist()
+
+        # Generate date range and collect it to list
+        date_range_expr = pl.date_range(start=start_date, end=end_date, eager=True)
+        date_range = date_range_expr.to_list()
+        # Xử lý các cột thời gian và giá trị
+        df = df.with_columns([
+            pl.col("SellFrom").str.to_datetime().cast(pl.Date).alias("SellFrom"),  # Cập nhật cột SellFrom
+            pl.col("SellTo").str.to_datetime().cast(pl.Date).alias("SellTo"),
+            pl.col("RoomType_Id").cast(pl.Utf8),
+            pl.col("HotelId").cast(pl.Utf8)  # Chuyển RoomType_Id sang kiểu str
+  # Chuyển RoomType_Id sang kiểu str
+       # Cập nhật cột SellTo
+        ])
+
+        # Ensure the dates are defined before they are used
+        start_date = datetime.today().date()  # Use only the date part (no time)
+        end_date = start_date + timedelta(days=6)
+
+        # Generate date range and collect it to list
+        date_range_expr = pl.date_range(start=start_date, end=end_date, eager=True)
+        date_range = date_range_expr.to_list()
+        date_range_dict = {date: 0 for date in date_range}
 
         result = []
         for room_type in df['RoomType_Id'].unique():
-            room_data = df[df['RoomType_Id'] == room_type]
-            hotel_id = df[df['RoomType_Id'] == room_type]['HotelId'].values[0]
-            room_availability = {"RoomType_Id": room_type, 'HotelId': hotel_id}
+            room_data = df.filter(pl.col('RoomType_Id') == room_type)
+            hotel_id = room_data['HotelId'][0]
+            room_availability = {'HotelId': hotel_id, "RoomType_Id": room_type}
 
             for date in date_range:
-                total_value = 0
-                for _, row in room_data.iterrows():
-                    sell_from = row['SellFrom']
-                    sell_to = row['SellTo']
-                    value = row['Value']
-                    if sell_from <= datetime.strptime(date, '%Y-%m-%d') <= sell_to:
-                        total_value += value
-                room_availability[date] = total_value
+                total_value=0
+                print(f"Checking availability for date: {date}")
+
+                # Get the indices for columns
+                sell_from_index = room_data.columns.index('SellFrom')
+                sell_to_index = room_data.columns.index('SellTo')
+                value_index = room_data.columns.index('Value')
+
+                for row in room_data.iter_rows():
+                    # Access columns by index
+                    sell_from = row[sell_from_index]  # Assuming 'SellFrom' is the first column
+                    sell_to = row[sell_to_index]    # Assuming 'SellTo' is the second column
+                    value = row[value_index]      # Assuming 'Value' is the third column
+                    print('sell_from',sell_from)
+                    print('date',date)
+                    print('sell',sell_to)
+                    # Compare datetime objects
+                    if sell_from <= date <= sell_to:
+                        total_value+=value
+                        print('total_valuet',total_value)
+
+                # Assign total_value to the corresponding date in date_range_dict
+                room_availability[str(date)] = total_value  # Store value by date
 
             result.append(room_availability)
 
-        final_df = pd.DataFrame(result)
-        final_df['RoomType_Id'] = final_df['RoomType_Id'].astype(str)
-        rooms_df['RoomType_Id'] = rooms_df['RoomType_Id'].astype(str)
-        hotels_df['HotelId'] = hotels_df['HotelId'].astype(str)
-        final_df['HotelId'] = final_df['HotelId'].astype(str)
 
-        result_df = final_df.merge(rooms_df, on='RoomType_Id', how='left')
-        result_df = result_df.merge(hotels_df, on='HotelId', how='left')
-        result_df = result_df.drop(columns=['RoomType_Id', 'HotelId'], axis=1)
-        result_df = result_df[['hotel_name', 'room_name'] + [col for col in result_df.columns if col not in ['hotel_name', 'room_name']]]
+        final_df = pl.DataFrame(result)
+        print(final_df)
+        final_df = final_df.join(rooms_df, on='RoomType_Id', how='left')
+        final_df = final_df.join(hotels_df, on='HotelId', how='left')
+
+        result_df = final_df.drop(['RoomType_Id', 'HotelId'])
         return result_df
 
     await main()
-
 
 result_df=0
 
 @app.route("/", methods=["GET"])
 def run_update_data():
     global result_df
-    print("Starting data update...")  # Log message
+    print("Starting data update...",result_df)  # Log message
     try:
         asyncio.run(update_data())
-        result_html = result_df.to_html(classes='table table-bordered table-striped', index=False)
+        print('result_df', result_df)
+
+        # Chuyển đổi Polars DataFrame sang Pandas DataFrame
+        pandas_df = result_df.to_pandas()
+
+        # Sử dụng .to_html() từ Pandas DataFrame
+        result_html = pandas_df.to_html(classes='table table-bordered table-striped', index=False)
+
         return render_template_string("""
             <html>
                 <head>
@@ -181,7 +191,6 @@ def run_update_data():
     except Exception as e:
         print(f"Error during data update: {e}")  # Log error
         return "Error occurred while processing the data."
-
 
 
 if __name__ == "__main__":
