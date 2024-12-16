@@ -16,7 +16,9 @@ RUN apt-get update -q && \
         libcups2 \
         libxkbcommon0 \
         libatspi2.0-0 \
-        libnss3
+        libnss3 \
+        wget \
+        ca-certificates
 
 # Sao chép file requirements.txt vào Docker image
 COPY requirements.txt .
@@ -25,8 +27,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Cài đặt Playwright và các trình duyệt cần thiết
-build -t playwright-chrome .
-docker run -it playwright-chrome
+RUN python3 -m playwright install
+
 # Sao chép mã nguồn ứng dụng
 COPY app.py .
 
