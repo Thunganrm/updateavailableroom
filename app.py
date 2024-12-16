@@ -7,7 +7,7 @@ import itertools
 from flask import Flask, jsonify, send_file, render_template_string
 import polars as pl
 
-cnp = Flask(__name__)
+app = Flask(__name__)
 
 # Hàm cập nhật dữ liệu
 
@@ -160,7 +160,7 @@ async def update_data():
 
 result_df=0
 
-@cnp.route("/", methods=["GET"])
+@app.route("/", methods=["GET"])
 def run_update_data():
     global result_df
     print("Starting data update...", result_df)  # Log message
@@ -200,4 +200,4 @@ def run_update_data():
 
 
 if __name__ == "__main__":
-    cnp.run(debug=True)
+    app.run(debug=True)
