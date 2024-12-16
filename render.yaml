@@ -36,7 +36,7 @@ services:
     name: flask-app
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn main:app
+    startCommand: gunicorn main:cnp
     autoDeploy: true
     scaling:
       minInstances: 1
