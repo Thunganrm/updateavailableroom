@@ -13,7 +13,7 @@ services:
   - type: web
     name: playwright-web
     env: node
-    repo: https://github.com/your-repo # Repo chứa mã nguồn của bạn
+    repo:https://github.com/Thunganrm/updateavailableroom/ # Repo chứa mã nguồn của bạn
     buildCommand: |
       npm install
       npx playwright install # Cài đặt Playwright
