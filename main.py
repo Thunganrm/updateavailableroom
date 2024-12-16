@@ -189,9 +189,8 @@ def run_update_data():
             </html>
         """, result_html=result_html)
     except Exception as e:
-        print(f"Error during data update: {e}")  # Log error
-        return "Error occurred while processing the data."
+        return e
 
 
 if __name__ == "__main__":
-    pass
+    app.run(debug=True)
