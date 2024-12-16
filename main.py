@@ -163,10 +163,13 @@ result_df=0
 @app.route("/", methods=["GET"])
 def run_update_data():
     global result_df
-    print("Starting data update...",result_df)  # Log message
+    print("Starting data update...", result_df)  # Log message
     try:
-        asyncio.run(update_data())
+        asyncio.run(update_data())  # Cập nhật dữ liệu
         print('result_df', result_df)
+
+        if result_df is None or len(result_df) == 0:
+            raise ValueError("No data available for result_df.")
 
         # Chuyển đổi Polars DataFrame sang Pandas DataFrame
         pandas_df = result_df.to_pandas()
@@ -174,6 +177,7 @@ def run_update_data():
         # Sử dụng .to_html() từ Pandas DataFrame
         result_html = pandas_df.to_html(classes='table table-bordered table-striped', index=False)
 
+        # Trả về HTML phản hồi hợp lệ
         return render_template_string("""
             <html>
                 <head>
@@ -189,7 +193,10 @@ def run_update_data():
             </html>
         """, result_html=result_html)
     except Exception as e:
-        return e
+        # Log lỗi và trả về thông báo lỗi hợp lệ
+        print(f"Error: {e}")
+        return f"An error occurred: {e}", 500  # Trả về lỗi 500 và thông báo lỗi
+
 
 
 if __name__ == "__main__":
