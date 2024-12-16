@@ -22,6 +22,7 @@ services:
     scaling:
       minInstances: 1
       maxInstances: 3
+      targetCPUPercent: 60 # Điều chỉnh mức độ sử dụng CPU (từ 1 đến 90)
     envVars:
       - key: NODE_ENV
         value: production
@@ -57,4 +58,3 @@ envVarGroups:
         generateValue: true # Tạo giá trị ngẫu nhiên cho biến môi trường
       - key: API_BASE_URL
         value: https://api.example.com # Địa chỉ API của bạn
-
