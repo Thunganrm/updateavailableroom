@@ -23,14 +23,19 @@ async def update_data():
             browser = await p.chromium.launch(headless=True)
             page = await browser.new_page()
 
-
+            print('da den trang dang nhap')
             await page.goto("https://id.bluejaypms.com/login")
+            await page.wait_for_load_state("load")  # Wait for page to be fully loaded
+
             await page.select_option("select[name='ddlLangCode']", "vi-VN")
             await page.fill("input[name='txtEmail']", "ngan.lalahouse@gmail.com")
             await page.fill("input[name='txtPassword']", "Hotelhelper@2024")
             await page.click("a#lkLogin")
+            await page.wait_for_load_state("load")  # Wait for page to be fully loaded
+
             await page.wait_for_timeout(5000)
 
+            print('da dang nhap')
 
             await page.wait_for_selector("#lvHotels_lbtNameHotel_0")
             await page.click("#lvHotels_lbtNameHotel_0")
