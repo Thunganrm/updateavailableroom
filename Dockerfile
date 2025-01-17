@@ -1,12 +1,13 @@
 # Sử dụng hình ảnh Python chính thức
 FROM python:3.11
+
+# Thêm kho lưu trữ Debian cũ để cài đặt các thư viện hệ thống cần thiết
 RUN echo "deb http://archive.debian.org/debian/ buster main" >> /etc/apt/sources.list
 
 # Cài đặt các thư viện hệ thống cần thiết để Chromium chạy trong chế độ headless
 RUN apt-get update && apt-get install -y \
     libnss3 \
     libxss1 \
-    libX11-xcb.so.1 \  
     libappindicator3-1 \
     libgdk-pixbuf2.0-0 \
     libdbus-1-3 \
@@ -26,10 +27,15 @@ RUN apt-get update && apt-get install -y \
 
 # Cài đặt các thư viện Python và Playwright
 RUN pip install --upgrade pip
+RUN pip install virtualenv
+
+# Tạo một virtual environment và cài đặt các gói vào đó
+RUN virtualenv /venv
+ENV PATH="/venv/bin:$PATH"
+
+# Cài đặt Playwright trong môi trường ảo
 RUN pip install playwright
-
 RUN playwright install
-
 
 # Sao chép mã nguồn vào Docker container
 COPY . /app
