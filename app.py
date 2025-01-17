@@ -20,12 +20,21 @@ async def update_data():
     async def main():
         global hotel_responses, result_df
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
+            browser = await p.chromium.launch(headless=False)
             page = await browser.new_page()
 
             print('da den trang dang nhap')
-            await page.goto("https://id.bluejaypms.com/login")
-            await page.wait_for_load_state("load")  # Wait for page to be fully loaded
+            try:
+                await page.goto("https://id.bluejaypms.com/login", timeout=60000)
+            except playwright._impl._errors.TimeoutError as e:
+                # Handle timeout error, maybe retry or log it
+                print(f"Timeout error: {str(e)}")
+                return "Timeout error occurred", 500
+            except playwright._impl._errors.Error as e:
+                # Handle other errors
+                print(f"Playwright error: {str(e)}")
+                return "Playwright error occurred", 500
+                        await page.wait_for_load_state("load")  # Wait for page to be fully loaded
 
             await page.select_option("select[name='ddlLangCode']", "vi-VN")
             await page.fill("input[name='txtEmail']", "ngan.lalahouse@gmail.com")
