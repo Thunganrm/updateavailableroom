@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Room Availability</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0"></script>
+    <div id="loading-message" style="display:none;">Vui lòng đợi, đang tải dữ liệu...</div>
+
+
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .highlight {
+            background-color: #ffcccb; /* Màu đỏ nhạt để tô */
+        }
+        .hotel-info {
+            margin-top: 20px;
+        }
+        .hotel-info p {
+            margin: 5px 0;
+        }
+        /* Style for the Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+}
+
+
+.modal-content {
+    background-color: #fff;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+}
+
+
+.close-btn {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+
+/* Hiệu ứng hover cho các ô trong bảng */
+td:hover {
+    background-color: #f0f0f0;  /* Màu nền khi hover */
+    cursor: pointer;  /* Con trỏ biến thành tay khi hover */
+}
+    /* Style cho bảng thông tin phòng */
+    #room-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+    }
+
+
+    /* Style cho tiêu đề và các ô trong bảng */
+    #room-table th, #room-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+    }
+
+
+    /* Style cho tiêu đề */
+    #room-table th {
+        background-color: #f2f2f2;
+    }
+
+
+    /* Hiệu ứng hover cho toàn bộ dòng trong bảng */
+    #room-table tr:hover {
+        background-color: #e1f5fe; /* Màu nền khi hover */
+        cursor: pointer; /* Con trỏ biến thành tay khi hover */
+    }
+
+
+    /* Hiệu ứng hover cho các ô trong bảng */
+    #room-table td:hover {
+        background-color: #f0f0f0; /* Màu nền khi hover vào một ô */
+    }
+    .hotel-item {
+    background-color: #f8f8f8; /* Màu nền sáng */
+    border-radius: 10px; /* Góc bo tròn */
+    padding: 20px;
+    margin: 10px 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Bóng đổ nhẹ */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hiệu ứng chuyển động */
+}
+
+
+.hotel-item:hover {
+    transform: translateY(-5px); /* Di chuyển lên khi hover */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Tăng bóng đổ khi hover */
+}
+
+
+.hotel-item h3 {
+font-size: 24px; /* Kích thước font tiêu đề lớn */
+    color: #333; /* Màu sắc chữ tối */
+    font-weight: bold;
+}
+
+
+.hotel-item p {
+    font-size: 16px; /* Kích thước chữ vừa phải */
+    color: #555; /* Màu sắc chữ nhạt hơn */
+    line-height: 1.5; /* Khoảng cách dòng dễ đọc */
+}
+
+
+.hotel-item .price {
+    font-size: 18px;
+    color: #e74c3c; /* Màu đỏ cho giá tiền để gây sự chú ý */
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+
+.hotel-item .url a {
+    color: #3498db; /* Màu xanh cho liên kết */
+    text-decoration: none;
+    font-weight: bold;
+}
+
+
+.hotel-item .url a:hover {
+    text-decoration: underline; /* Gạch chân khi hover */
+}
+/* Hiệu ứng fade-in cho toàn bộ phần hiển thị thông tin */
+#hotel-info {
+    opacity: 0; /* Ban đầu, phần tử sẽ ẩn đi */
+    transform: scale(0.9); /* Ban đầu phần tử sẽ bị thu nhỏ */
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out; /* Thêm hiệu ứng chuyển đổi */
+}
+
+
+#hotel-info.show {
+    opacity: 1; /* Khi thêm lớp .show, phần tử sẽ hiện ra */
+    transform: scale(1); /* Phóng to về kích thước bình thường */
+}
+
+
+/* Hiệu ứng hover cho nút Edit */
+#hotel-info button {
+    background-color: #3498db; /* Màu xanh cho nút */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Hiệu ứng màu nền khi hover */
+}
+/* Style cho khung chứa thông tin khách sạn */
+.hotel-info-box {
+    background-color: #fff;
+    border: 2px solid #007bff; /* Khung với màu xanh dương */
+    border-radius: 10px; /* Góc bo tròn */
+    padding: 20px; /* Khoảng cách giữa nội dung và khung */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Bóng đổ nhẹ */
+    margin: 20px 0; /* Khoảng cách trên và dưới */
+    max-width: 600px; /* Giới hạn chiều rộng */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+/* Đổi màu khi hover vào các phần tử trong khung */
+.hotel-info-box:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Tăng độ đổ bóng khi hover */
+    border-color: #0056b3; /* Đổi màu khung khi hover */
+}
+
+
+/* Style cho tiêu đề thông tin khách sạn */
+.hotel-info-box h3, .hotel-info-box h4 {
+    color: #007bff;
+    font-family: Arial, sans-serif;
+}
+
+
+/* Style cho các phần tử văn bản trong khung */
+.hotel-info-box p {
+    font-size: 16px;
+    color: #333;
+    font-family: 'Arial', sans-serif;
+}
+
+
+/* Style cho nút Edit */
+.hotel-info-box button {
+    background-color: #007bff; /* Màu nền xanh dương */
+    color: #fff; /* Màu chữ trắng */
+    border: none;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+
+/* Hiệu ứng khi hover vào nút Edit */
+.hotel-info-box button:hover {
+    background-color: #0056b3;
+}
+
+
+
+
+#hotel-info button:hover {
+background-color: #2980b9; /* Màu nền thay đổi khi hover */
+}
+
+
+    </style>
+
+
+</head>
+<body>
+
+
+<h2>Hotel Room Availability</h2>
+
+
+<!-- Box nhập ngày -->
+<label for="date-input">Enter Date (e.g., 2024-12-05): </label>
+<input type="text" id="date-input" placeholder="YYYY-MM-DD">
+<button onclick="highlightColumn()">Submit</button>
+
+
+<br><br>
+<!-- Modal -->
+<div id="room-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <h2>Room Availability for Selected Date</h2>
+        <table id="modal-table">
+            <thead>
+                <tr>
+                    <th>Hotel</th>
+                    <th>Room</th>
+                    <th>Availability</th>
+                </tr>
+            </thead>
+            <tbody id="modal-room-data">
+                <!-- Data will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+<div id="hotel-info" class="hotel-info">
+    <!-- Hotel room info will be displayed here -->
+</div>
+<!-- Filter khách sạn -->
+<label for="hotel-filter">Filter by Hotel: </label>
+<select id="hotel-filter" onchange="filterRooms()">
+    <option value="">All Hotels</option>
+    <option value="Ben Thanh Inn">Ben Thanh Inn</option>
+    <option value="Elegant Feel Inn">Elegant Feel Inn</option>
+    <option value="MG Daisy">MG Daisy</option>
+</select>
+<!-- Make sure to include the Supabase JavaScript client before your own script -->
+
+
+
+
+<!-- Bảng thông tin phòng -->
+
+
+<table id="room-table">
+    <thead>
+        <tr id="room-header">
+            <!-- Các header sẽ được tạo động ở đây -->
+        </tr>
+    </thead>
+    <tbody id="room-data">
+        <!-- Các hàng dữ liệu sẽ được render ở đây -->
+    </tbody>
+</table>
+<!-- Display hotel info -->
+<div id="hotel-info" class="hotel-info">
+    <!-- Hotel room info will be displayed here -->
+</div>
+
+
+
+
+<script type="text/javascript">
+    // Chuyển đổi result_list từ Jinja thành một biến JavaScript
+    var resultList = {{ resultList | tojson | safe }};
+
+
+
+    // var resultList  = document.getElementById(resultList), test = "{{ resultList | tojson }}";
+
+
+    // Khởi tạo roomData từ resultList
+    let roomData = resultList;
+    console.log('roomData',roomData)
+    // Dữ liệu ban đầu để render bảng
+    let filteredRoomData = roomData;
+    console.log('filteredRoomData',filteredRoomData)
+
+
+    async function loadRoomData() {
+        console.log("Đang tải dữ liệu từ data.json...");
+        renderRooms();
+
+
+    // try {
+    //     const response = await fetch('data.json'); // Lấy dữ liệu từ file JSON
+
+
+    //     if (!response.ok) {
+    //         throw new Error('Không thể tải dữ liệu từ server');
+    //     }
+
+
+    //     const data = await response.json(); // Chuyển đổi dữ liệu JSON từ phản hồi
+
+
+    //     console.log("Dữ liệu đã tải thành công:", data); // Kiểm tra dữ liệu
+//     // Kiểm tra xem dữ liệu có phải là mảng không và có chứa dữ liệu
+    //     if (!Array.isArray(data) || data.length === 0) {
+    //         throw new Error('Dữ liệu không hợp lệ hoặc mảng trống');
+    //     }
+
+
+    //     roomData = data; // Gán dữ liệu vào mảng roomData
+
+
+    //     filteredRoomData = roomData; // Khởi tạo mảng lọc với dữ liệu đã tải
+
+
+        // Gọi hàm renderRooms() sau khi dữ liệu được tải thành công
+    // } catch (error) {
+    //     console.error('Error loading room data:', error); // Hiển thị thông báo lỗi chi tiết
+    //     alert('Không thể tải dữ liệu phòng. Vui lòng thử lại sau.');
+    // }
+}
+
+window.onload = () => {
+    console.log("Page loaded.");
+    renderRooms();
+ // Hiển thị bảng ngay khi trang tải xong
+};
+
+
+
+
+
+
+
+    // Dữ liệu khách sạn với thông tin chi tiết
+
+
+const supabaseUrl = "https://kmtlerficpmeozxixggz.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImttdGxlcmZpY3BtZW96eGl4Z2d6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMyODAxMTIsImV4cCI6MjA0ODg1NjExMn0.fLokmVILQ8pqiJenLNnqqJM3fkkMVZ4cUhqg4EwP0Jk";
+const supabases = supabase.createClient(supabaseUrl, supabaseKey);
+
+
+ // Notice 'Supabase' in uppercase
+let hotelDetails=[];
+async function fetchHotelData() {
+    console.log('Fetching hotel data...');
+
+
+    try {
+
+        const { data, error } = await supabases
+            .from('hotels') // Thay 'hotels' bằng tên bảng trong Supabase của bạn
+            .select('*');
+
+        if (error) {
+            console.error('Error fetching data:', error);
+            alert('Lỗi khi lấy dữ liệu khách sạn');
+            return;
+        }
+
+        console.log('Hotel data fetched:', data);
+        if (error) {
+            console.error('Error fetching data:', error);
+            alert('Lỗi khi lấy dữ liệu khách sạn');
+            return;
+        }
+
+        console.log('Hotel data fetched:', data);
+        hotelDetails = data; // Lưu dữ liệu khách sạn
+    } catch (err) {
+        console.error('Unexpected error:', err);
+        alert('Đã xảy ra lỗi không mong muốn.');
+    }
+}
+
+
+
+
+
+    // Function để lọc thông tin phòng theo khách sạn
+    function filterRooms() {
+    const selectedHotel = document.getElementById("hotel-filter").value;
+    console.log('selectedHotel',selectedHotel)
+    console.log('roomData',roomData)
+
+    if (selectedHotel) {
+        filteredRoomData = {
+            hotel_name: roomData.hotel_name.filter((hotel, index) => hotel === selectedHotel),
+            room_name: roomData.room_name.filter((_, index) => roomData.hotel_name[index] === selectedHotel),
+            ...Object.fromEntries(
+                Object.entries(roomData)
+                    .filter(([key]) => !['hotel_name', 'room_name'].includes(key)) // Bỏ qua cột không cần
+                    .map(([key, values]) => [
+                        key,
+                        values.filter((_, index) => roomData.hotel_name[index] === selectedHotel)
+                    ])
+            )
+        };
+    } else {
+        // Nếu không chọn, hiển thị tất cả các phòng
+        filteredRoomData = roomData;
+    }
+    renderRooms(); // Cập nhật lại bảng sau khi lọc
+}
+
+
+// Hàm hiển thị thông tin trong Modal
+// Hàm hiển thị thông tin trong Modal
+// Hàm hiển thị thông tin trong Modal
+function showModal(rooms, dateInput) {
+    const modal = document.getElementById("room-modal");
+    const tableBody = document.getElementById("modal-room-data");
+    tableBody.innerHTML = ''; // Clear old data
+
+
+    rooms.forEach(room => {
+        const row = document.createElement("tr");
+
+
+        const hotelCell = document.createElement("td");
+        hotelCell.textContent = room.hotel_name;
+        row.appendChild(hotelCell);
+
+
+        const roomCell = document.createElement("td");
+        roomCell.textContent = room.room_name;
+        row.appendChild(roomCell);
+
+
+        // Hiển thị ngày và số lượng phòng còn lại cho ngày đã chọn
+        const availability = room[dateInput];
+
+
+        const availabilityCell = document.createElement("td");
+        availabilityCell.textContent = (room.availability !== undefined && room.availability !== null) 
+            ? room.availability 
+            : "N/A"; // Nếu không có giá trị thì hiển thị "N/A"
+        row.appendChild(availabilityCell);
+
+        tableBody.appendChild(row);
+    });
+
+
+    // Hiển thị Modal
+    modal.style.display = "block";
+}
+
+
+
+
+// Hàm đóng Modal
+function closeModal() {
+    const modal = document.getElementById("room-modal");
+    modal.style.display = "none";
+}
+
+
+    // Function để render bảng thông tin phòng
+// Function để render bảng thông tin phòng
+    // Hàm render bảng thông tin phòng
+    function renderRooms() {
+    const table = document.getElementById('room-table');
+    const headerRow = document.getElementById('room-header');
+    const tbody = document.getElementById('room-data');
+    console.log('filteredRoomData',filteredRoomData)
+    // Lấy danh sách cột từ dữ liệu, trừ 'hotel_name' và 'room_name'
+    const headers = Object.keys(filteredRoomData).filter(
+        key => !['hotel_name', 'room_name'].includes(key)
+    );
+
+    // Đảm bảo 'hotel_name' và 'room_name' luôn đứng đầu
+    const customOrder = ['hotel_name', 'room_name'];
+    const sortedHeaders = customOrder.concat(headers);
+
+    // Tạo tiêu đề cột
+    headerRow.innerHTML = '';
+    sortedHeaders.forEach(header => {
+        const th = document.createElement('th');
+        th.textContent = header;
+        headerRow.appendChild(th);
+    });
+
+    // Tạo nội dung bảng
+    tbody.innerHTML = '';
+    filteredRoomData.hotel_name.forEach((hotel, index) => {
+        const row = document.createElement('tr');
+        const roomName = filteredRoomData.room_name[index]; // Lấy room_name từ filteredRoomData
+
+        row.addEventListener('click', () => showHotelDetails(hotel,roomName)); // Add event listener for row click
+
+        // Thêm các ô dữ liệu
+        row.innerHTML = `
+            <td>${hotel}</td>
+            <td>${filteredRoomData.room_name[index]}</td>
+            ${headers
+                .map(header => `<td>${filteredRoomData[header][index] || 0}</td>`)
+                .join('')}
+        `;
+
+        tbody.appendChild(row);
+    });
+}
+
+        
+
+
+    //     // Loop through each date (filteredRoomData keys) to add room data
+    //     Object.keys(filteredRoomData).forEach(date => {
+    //         const td = document.createElement('td');
+    //         const availability = filteredRoomData[date][index] || 0;  // Get the availability for the current hotel and date
+    //         td.textContent = availability; // Show the availability value
+    //         row.appendChild(td);
+    //     });
+
+
+    //     tbody.appendChild(row); // Add the row to the table body
+    // });
+
+    // }
+
+
+// Gọi hàm tải dữ liệu khi trang được tải
+
+
+
+
+    // Function để hiển thị thông tin chi tiết khách sạn khi click vào phòng
+// Function để hiển thị thông tin chi tiết khách sạn khi click vào phòng
+    // Hàm hiển thị thông tin chi tiết khách sạn và loại phòng khi người dùng click vào một phòng
+// Function để hiển thị thông tin chi tiết khách sạn khi click vào phòng
+function showHotelDetails(hotelName, roomType) {
+    fetchHotelData()
+    console.log('hotelName',hotelName,roomType)
+    const hotelInfoDiv = document.getElementById("hotel-info");
+    console.log('hotelDetails',hotelDetails)
+    const hotel = hotelDetails.find(h => h.hotel_name === hotelName && h.room_name === roomType);
+
+
+    // Lấy phần tử hotel-info và xóa lớp .show để reset lại hiệu ứng
+    hotelInfoDiv.classList.remove('show');
+
+    console.log('hotelName',hotelName,roomType)
+
+    // Kiểm tra xem thông tin khách sạn có tồn tại không
+    if (hotel) {
+        console.log(hotel)
+        hotelInfoDiv.innerHTML = `
+        <div class="hotel-info-box">
+            <h3>Hotel Information: ${hotel.hotel_name} - ${hotel.room_name}</h3>
+            <h4>Price: ${hotel.price}</h4>
+            <p><strong>Address:</strong> ${hotel.address}</p>
+            <p><strong>Contact Info:</strong> ${hotel.info}</p>
+            <p><strong>Room Images:</strong> <a href="${hotel.url}" target="_blank">View Images</a></p>
+            <button onclick="editHotelDetails('${hotel.hotel_name}', '${hotel.room_name}')">Edit Info</button>
+        </div>
+        `;
+
+
+        // Thêm lớp .show để kích hoạt hiệu ứng fade-in
+        setTimeout(() => {
+hotelInfoDiv.classList.add('show');
+        }, 50); // Chờ một chút để hiệu ứng chuyển đổi hoạt động
+    } else {
+        hotelInfoDiv.innerHTML = `<p>No details found for this room type.</p>`;
+    }
+}
+
+
+function showLoadingMessage() {
+    document.getElementById("loading-message").style.display = 'block';
+}
+
+
+function hideLoadingMessage() {
+    document.getElementById("loading-message").style.display = 'none';
+}
+
+
+// Function để hiển thị form chỉnh sửa thông tin khách sạn
+function editHotelDetails(hotelName, roomType) {
+    const hotel = hotelDetails.find(h => h.hotel_name === hotelName && h.room_name === roomType);
+
+
+    if (hotel) {
+        // Hiển thị form chỉnh sửa
+        const hotelInfoDiv = document.getElementById("hotel-info");
+        hotelInfoDiv.innerHTML = `
+                <div class="hotel-info-box">
+
+
+            <h3>Edit Hotel Information</h3>
+            <form id="edit-form">
+                <label for="price">Price:</label>
+                <input type="number" id="price" value="${hotel.price}" required><br><br>
+               
+                <label for="address">Address:</label>
+                <input type="text" id="address" value="${hotel.address}" required><br><br>
+               
+                <label for="contact-info">Contact Info:</label>
+                <input type="text" id="contact-info" value="${hotel.info}" required><br><br>
+               
+                <label for="url">Room Images URL:</label>
+                <input type="text" id="url" value="${hotel.url}" required><br><br>
+               
+                <button type="button" onclick="updateHotelInfo('${hotel.hotel_name}', '${hotel.room_name}')">Update</button>
+                <button type="button" onclick="cancelEdit()">Cancel</button>
+            </form>
+                    </div>
+
+
+        `;
+    }
+}
+
+
+// Function để cập nhật thông tin khách sạn sau khi chỉnh sửa
+
+
+// Function để hủy bỏ chỉnh sửa và quay lại thông tin khách sạn
+function cancelEdit() {
+    const hotelName = document.getElementById("hotel-info").getAttribute("data-hotel-name");
+    const roomType = document.getElementById("hotel-info").getAttribute("data-room-type");
+   
+    // Hiển thị lại thông tin khách sạn
+    showHotelDetails(hotelName, roomType);
+};
+// Initialize Supabase client
+
+
+// Update hotel info
+async function updateHotelInfo(hotelName, roomType) {
+
+
+    const hotel = hotelDetails.find(h => h.hotel_name === hotelName && h.room_name === roomType);
+
+
+    if (hotel) {
+        const updatedPrice = document.getElementById("price").value;
+        const updatedAddress = document.getElementById("address").value;
+        const updatedContactInfo = document.getElementById("contact-info").value;
+        const updatedUrl = document.getElementById("url").value;
+
+
+        const { data, error } = await supabases
+            .from('hotels')
+            .update({
+                price: updatedPrice,
+                address: updatedAddress,
+                info: updatedContactInfo,
+                url: updatedUrl
+            })
+            .eq('hotel_name', hotelName)
+            .eq('room_name', roomType);
+
+
+        if (error) {
+            alert("Update failed!");
+        } else {
+            alert("Hotel information updated successfully.");
+            // Gọi lại thông tin sau khi cập nhật từ Supabase
+            fetchHotelData(hotelName, roomType);
+        }
+    }
+}
+
+
+
+
+
+
+// Hàm kiểm tra ngày hợp lệ
+function isValidDate(dateString) {
+    const regex = /^\d{4}-\d{2}-\d{2}$/; // Định dạng yyyy-mm-dd
+    if (!dateString.match(regex)) {
+        return false; // Nếu không khớp với định dạng thì trả về false
+    }
+
+
+    const date = new Date(dateString);
+    const timestamp = date.getTime();
+
+
+    // Kiểm tra xem ngày có hợp lệ không
+    return timestamp && timestamp > 0 && date.toISOString().slice(0, 10) === dateString;
+}
+// Hàm highlight một cột trong bảng khi click vào button
+
+
+function highlightColumn() {
+    const dateInput = document.getElementById("date-input").value;
+
+    if (!isValidDate(dateInput)) {
+        alert('Please enter a valid date in YYYY-MM-DD format.');
+        return;
+    }
+
+    // Lọc ra các phòng có giá trị tại cột đó lớn hơn không
+    const roomsToDisplay = [];
+    filteredRoomData.hotel_name.forEach((hotel, index) => {
+        const availability = filteredRoomData[dateInput][index]; // Lấy giá trị từ cột tương ứng với ngày
+        if (availability > 0) {
+            roomsToDisplay.push({
+                hotel_name: hotel,
+                room_name: filteredRoomData.room_name[index],
+                availability:availability,
+            });
+        }
+    });
+
+    // Kiểm tra giá trị của phòng
+    console.log("Rooms with availability for", dateInput, roomsToDisplay);
+
+    // Hiển thị thông tin trong modal
+    showModal(roomsToDisplay, dateInput);
+}
+
+
+
+
+
+
+
+
+</script>
+
+
+</body>
+</html>
