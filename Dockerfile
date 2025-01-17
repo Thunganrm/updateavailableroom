@@ -1,12 +1,12 @@
 # Sử dụng hình ảnh Python chính thức
-FROM python:3.11-slim
+FROM python:3.11
+RUN echo "deb http://archive.debian.org/debian/ buster main" >> /etc/apt/sources.list
 
 # Cài đặt các thư viện hệ thống cần thiết để Chromium chạy trong chế độ headless
 RUN apt-get update && apt-get install -y \
     libnss3 \
     libxss1 \
     libappindicator3-1 \
-    libindicator3-0.7 \
     libgdk-pixbuf2.0-0 \
     libdbus-1-3 \
     libatk-bridge2.0-0 \
