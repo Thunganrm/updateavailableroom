@@ -36,7 +36,9 @@ services:
     name: flask-app
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    startCommand: "python app.py"
+    port: 5000  # Hoặc sử dụng PORT từ môi trường
+
     autoDeploy: true
     scaling:
       minInstances: 1
