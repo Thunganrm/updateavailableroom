@@ -6,6 +6,7 @@ RUN echo "deb http://archive.debian.org/debian/ buster main" >> /etc/apt/sources
 RUN apt-get update && apt-get install -y \
     libnss3 \
     libxss1 \
+    libX11-xcb.so.1 \  
     libappindicator3-1 \
     libgdk-pixbuf2.0-0 \
     libdbus-1-3 \
