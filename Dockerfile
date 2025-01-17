@@ -25,6 +25,8 @@ RUN apt-get update && apt-get install -y \
 
 # Cài đặt các thư viện Python và Playwright
 RUN pip install --upgrade pip
+RUN pip install playwright
+
 RUN playwright install
 
 
