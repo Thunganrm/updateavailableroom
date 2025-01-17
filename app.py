@@ -243,6 +243,5 @@ def run_update_data():
 
 
 if __name__ == "__main__":
-    import os
-    port = int(os.getenv('PORT', 5000))  # Nếu không có PORT thì dùng cổng mặc định 5000
-    app.run(host='0.0.0.0', port=port)
+  # Nếu không có PORT thì dùng cổng mặc định 5000
+    app.run(host='0.0.0.0', port=10000)
