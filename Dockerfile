@@ -5,6 +5,7 @@ FROM python:3.11
 RUN echo "deb http://archive.debian.org/debian/ buster main" >> /etc/apt/sources.list
 
 # Cài đặt các thư viện hệ thống cần thiết để Chromium chạy trong chế độ headless
+# Cài đặt các thư viện hệ thống bổ sung cho Chromium
 RUN apt-get update && apt-get install -y \
     libnss3 \
     libxss1 \
@@ -22,8 +23,9 @@ RUN apt-get update && apt-get install -y \
     libpangocairo-1.0-0 \
     libpango-1.0-0 \
     libgtk-3-0 \
-    libnss3-dev \
+    libx11-xcb1 \
     && apt-get clean
+
 
 # Cài đặt các thư viện Python và Playwright
 RUN pip install --upgrade pip
