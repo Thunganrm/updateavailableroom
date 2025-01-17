@@ -1,39 +1,44 @@
-# Sử dụng image Python chính thức làm base image
-FROM python:3.11
+# Sử dụng hình ảnh Python chính thức
+FROM python:3.11-slim
 
-# Cài đặt các phụ thuộc hệ thống cần thiết
-RUN apt-get update -q && \
-    apt-get install -y -qq --no-install-recommends \
-        xvfb \
-        libxcomposite1 \
-        libxdamage1 \
-        libatk1.0-0 \
-        libasound2 \
-        libdbus-1-3 \
-        libnspr4 \
-        libgbm1 \
-        libatk-bridge2.0-0 \
-        libcups2 \
-        libxkbcommon0 \
-        libatspi2.0-0 \
-        libnss3 \
-        wget \
-        ca-certificates
+# Cài đặt các thư viện hệ thống cần thiết để Chromium chạy trong chế độ headless
+RUN apt-get update && apt-get install -y \
+    libnss3 \
+    libxss1 \
+    libappindicator3-1 \
+    libindicator3-0.7 \
+    libgdk-pixbuf2.0-0 \
+    libdbus-1-3 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libcups2 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    libgbm1 \
+    libasound2 \
+    libpangocairo-1.0-0 \
+    libpango-1.0-0 \
+    libgtk-3-0 \
+    libnss3-dev \
+    && apt-get clean
 
-# Sao chép file requirements.txt vào Docker image
-COPY requirements.txt .
+# Cài đặt các thư viện Python và Playwright
+RUN pip install --upgrade pip
+RUN pip install playwright
 
-# Cài đặt các Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Cài đặt Playwright và tải xuống các trình duyệt
+RUN python -m playwright install
 
-# Cài đặt Playwright và các trình duyệt cần thiết
-RUN python3 -m playwright install
+# Sao chép mã nguồn vào Docker container
+COPY . /app
+WORKDIR /app
 
-# Sao chép mã nguồn ứng dụng
-COPY app.py .
+# Cài đặt các phụ thuộc của ứng dụng
+RUN pip install -r requirements.txt
 
-# Thiết lập biến môi trường DISPLAY
-ENV DISPLAY=:99
+# Mở cổng mà ứng dụng sẽ lắng nghe
+EXPOSE 10000
 
-# Lệnh chạy ứng dụng (bắt đầu Xvfb và sau đó chạy script)
-CMD Xvfb :99 -screen 0 1024x768x16 & python3 app.py
+# Chạy ứng dụng khi container bắt đầu
+CMD ["gunicorn", "app:app", "-b", "0.0.0.0:10000"]
