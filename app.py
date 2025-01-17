@@ -20,7 +20,7 @@ async def update_data():
     async def main():
         global hotel_responses, result_df
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=False)
+            browser = await p.chromium.launch(headless=True)
             page = await browser.new_page()
 
             print('da den trang dang nhap')
