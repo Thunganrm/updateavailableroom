@@ -48,7 +48,6 @@ async def update_data():
 
             # Lấy cookies từ trang
             cookies = page.context.cookies()
-            print(cookies)
             keys_to_keep = [
                 "ASP.NET_SessionId", "HtLanguage", "HtToken", "HtHotelId", "HtBaseDir"
             ]
@@ -136,7 +135,6 @@ async def update_data():
 
 
         df = pl.DataFrame(bt)
-        print(df.columns)
 
 
 
@@ -179,7 +177,6 @@ async def update_data():
 
             for date in date_range:
                 total_value=0
-                print(f"Checking availability for date: {date}")
 
 
                 # Get the indices for columns
@@ -193,13 +190,10 @@ async def update_data():
                     sell_from = row[sell_from_index]  # Assuming 'SellFrom' is the first column
                     sell_to = row[sell_to_index]    # Assuming 'SellTo' is the second column
                     value = row[value_index]      # Assuming 'Value' is the third column
-                    print('sell_from',sell_from)
-                    print('date',date)
-                    print('sell',sell_to)
+
                     # Compare datetime objects
                     if sell_from <= date <= sell_to:
                         total_value+=value
-                        print('total_valuet',total_value)
 
 
                 # Assign total_value to the corresponding date in date_range_dict
@@ -212,13 +206,11 @@ async def update_data():
 
 
         final_df = pl.DataFrame(result)
-        print(final_df)
         final_df = final_df.join(rooms_df, on='RoomType_Id', how='left')
         final_df = final_df.join(hotels_df, on='HotelId', how='left')
 
 
         result_df = final_df.drop(['RoomType_Id', 'HotelId'])
-        print(result_df)
         return result_df
 
 
@@ -231,14 +223,10 @@ result_df=0
 @app.route("/", methods=["GET"])
 def run_update_data():
     global result_df
-    print("updateupdate")
     asyncio.run(update_data())  # Cập nhật dữ liệu
-    print(result_df)
-    print(type(result_df))
+    print('update')
     resultList = {col: result_df[col].to_list() for col in result_df.columns}
-    print(resultList)
     # resultList={'2025-01-17': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], '2025-01-18': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], '2025-01-19': [0, 1, 0, 3, 0, 0, 0, 0, 0, 0, 0], '2025-01-20': [1, 0, 1, 1, 0, 3, 0, 1, 1, 0, 0], '2025-01-21': [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0], '2025-01-22': [1, 0, 0, 1, 1, 4, 0, 0, 0, 0, 1], '2025-01-23': [0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0], '2025-01-24': [1, 0, 0, 0, 1, 3, 1, 1, 0, 0, 0], '2025-01-25': [1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 1], '2025-01-26': [0, 0, 1, 0, 0, 0, 2, 0, 0, 1, 0], '2025-01-27': [0, 1, 2, 1, 0, 2, 1, 0, 0, 0, 0], '2025-01-28': [0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1], '2025-01-29': [0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0], '2025-01-30': [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0], '2025-01-31': [0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0], '2025-02-01': [0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1], 'room_name': ['Luxury', 'King room with Balcony', 'Superior', 'Deluxe Double Room', 'Queen', 'Deluxe Double Room', 'King room with garden view', 'Deluxe', 'Standard', 'King room with Balcony', 'King room with garden view'], 'hotel_name': ['MG Daisy', 'Elegant Feel Inn', 'MG Daisy', 'Elegant Feel Inn', 'MG Daisy', 'Ben Thanh Inn', 'Elegant Feel Inn', 'MG Daisy', 'MG Daisy', 'Ben Thanh Inn', 'Ben Thanh Inn']}
-    # print(resultList) 
     return render_template('index.html', resultList=resultList)
 
 
