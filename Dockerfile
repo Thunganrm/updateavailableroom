@@ -50,23 +50,7 @@ RUN yarn playwright install chromium
 
 # Cài đặt các thư viện Python cần thiết
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Cài đặt các phụ thuộc của Playwright (các thư viện hệ thống cần thiết)
-RUN yarn playwright install-deps
-
-# Sao chép mã nguồn vào container
-COPY . /app
-
-# Chạy các bước cài đặt thư viện Python yêu cầu
-
-RUN pip install -r requirements.txt
-
-RUN playwright install
-
-
-# Lệnh để kiểm tra và sao lưu cache của Playwright
-EXPOSE 10000
+RUN pip insta5000
 
 # Chạy ứng dụng Flask với Xvfb để hỗ trợ Playwright (headless)
 CMD xvfb-run -a python app.py
