@@ -47,7 +47,7 @@ async def update_data():
             page.wait_for_selector("div#hotel-detail", timeout=30000)
 
             # Lấy cookies từ trang
-            cookies = page.context.cookies()
+            cookies = await page.context.cookies()
             keys_to_keep = [
                 "ASP.NET_SessionId", "HtLanguage", "HtToken", "HtHotelId", "HtBaseDir"
             ]
