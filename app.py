@@ -38,13 +38,13 @@ async def update_data():
             page.click("button#lkLogin")
 
             # Chờ tải trang sau khi đăng nhập
-            page.wait_for_selector("a#lvHotels_lbtNameHotel_0", timeout=30000)
+            page.wait_for_selector("a#lvHotels_lbtNameHotel_0", timeout=10000)
 
             # Nhấn vào khách sạn đầu tiên
             page.click("a#lvHotels_lbtNameHotel_0")
 
             # Chờ tải trang khách sạn
-            page.wait_for_selector("div#hotel-detail", timeout=30000)
+            page.wait_for_selector("div#hotel-detail", timeout=10000)
 
             # Lấy cookies từ trang
             cookies = await page.context.cookies()
@@ -101,7 +101,7 @@ async def update_data():
                     hotel_responses.append(response.json())
 
         finally:
-            browser.close()
+            await browser.close()
 
 
         bt = list(itertools.chain.from_iterable(hotel_responses))
