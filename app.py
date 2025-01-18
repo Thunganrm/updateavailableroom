@@ -51,6 +51,7 @@ async def update_data():
         
                 # Lấy cookies từ trang
                 cookies = await page.context.cookies()
+                print('cookies',cookies)
                 keys_to_keep = [
                     "ASP.NET_SessionId", "HtLanguage", "HtToken", "HtHotelId", "HtBaseDir"
                 ]
