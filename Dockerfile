@@ -57,8 +57,21 @@ RUN yarn playwright install-deps
 COPY . /app
 
 # Chạy các bước cài đặt thư viện Python yêu cầu
+
 RUN pip install -r requirements.txt
 
+RUN playwright install
+
+# Store/pull Playwright cache with build cache
+if [[ ! -d $PLAYWRIGHT_BROWSERS_PATH ]]; then 
+  echo "...Copying Playwright Cache from Build Cache" 
+  cp -R $XDG_CACHE_HOME/playwright/ $PLAYWRIGHT_BROWSERS_PATH
+else 
+  echo "...Storing Playwright Cache in Build Cache" 
+  cp -R $PLAYWRIGHT_BROWSERS_PATH $XDG_CACHE_HOME
+fi
+
+xvfb-run app.py
 # Mở cổng cho ứng dụng Flask
 EXPOSE 10000
 
