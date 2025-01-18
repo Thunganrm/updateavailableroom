@@ -62,14 +62,20 @@ RUN pip install -r requirements.txt
 
 RUN playwright install
 
+
 # Lệnh để kiểm tra và sao lưu cache của Playwright
 RUN if [ ! -d "$PLAYWRIGHT_BROWSERS_PATH" ]; then \
     echo "...Copying Playwright Cache from Build Cache"; \
-    cp -R $XDG_CACHE_HOME/playwright/ $PLAYWRIGHT_BROWSERS_PATH; \
+    if [ -d "$XDG_CACHE_HOME/playwright" ]; then \
+        cp -R $XDG_CACHE_HOME/playwright/ $PLAYWRIGHT_BROWSERS_PATH; \
+    else \
+        echo "Playwright cache not found"; \
+    fi; \
     else \
     echo "...Storing Playwright Cache in Build Cache"; \
     cp -R $PLAYWRIGHT_BROWSERS_PATH $XDG_CACHE_HOME; \
     fi
+
 
 # Mở cổng cho ứng dụng Flask
 EXPOSE 5000
