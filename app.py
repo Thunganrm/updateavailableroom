@@ -145,7 +145,7 @@ async def update_data():
         df = pl.DataFrame(bt)
 
 
-
+        print(df)
 
         start_date = datetime.today()
         end_date = start_date + timedelta(days=30)
@@ -155,14 +155,18 @@ async def update_data():
         date_range_expr = pl.date_range(start=start_date, end=end_date, eager=True)
         date_range = date_range_expr.to_list()
         # Xử lý các cột thời gian và giá trị
+        print(df.columns)
+
+        if "SellFrom" in df.columns:
+
         df = df.with_columns([
             pl.col("SellFrom").str.to_datetime().cast(pl.Date).alias("SellFrom"),  # Cập nhật cột SellFrom
             pl.col("SellTo").str.to_datetime().cast(pl.Date).alias("SellTo"),
             pl.col("RoomType_Id").cast(pl.Utf8),
-            pl.col("HotelId").cast(pl.Utf8)  # Chuyển RoomType_Id sang kiểu str
-  # Chuyển RoomType_Id sang kiểu str
-       # Cập nhật cột SellTo
-        ])
+            pl.col("HotelId").cast(pl.Utf8)])
+            
+        else:
+            print("SellFrom column is missing!")
         # Ensure the dates are defined before they are used
         start_date = datetime.today().date()  # Use only the date part (no time)
         end_date = start_date + timedelta(days=30)
