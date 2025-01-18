@@ -11,7 +11,7 @@ import polars as pl
 
 app = Flask(__name__)
 
-
+playwright.install()
 # Hàm cập nhật dữ liệu
 
 
