@@ -37,6 +37,7 @@ WORKDIR /app
 
 # Tạo package.json cho Playwright
 RUN echo '{"name": "playwright-app", "version": "1.0.0", "devDependencies": {"playwright": "^1.24.0"}}' > package.json
+RUN yarn install
 
 # Cài đặt Playwright
 RUN yarn playwright install
@@ -63,7 +64,6 @@ WORKDIR /app
 
 # Cài đặt thư viện yêu cầu
 RUN pip install -r requirements.txt
-RUN yarn install
 
 # Mở cổng cho ứng dụng Flask
 EXPOSE 5000
