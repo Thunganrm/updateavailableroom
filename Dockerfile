@@ -49,7 +49,7 @@ RUN yarn playwright install
 RUN yarn playwright install chromium
 
 # Cài đặt các thư viện Python cần thiết
-COPY requirements.txt
+RUN pip install -r requirements.txt
 RUN playwright install
 EXPOSE 5000
 
