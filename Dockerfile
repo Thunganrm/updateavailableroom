@@ -1,4 +1,3 @@
-# Bắt đầu từ image Python chính thức
 FROM python:3.11-slim
 
 # Cài đặt các dependencies hệ thống cần thiết
@@ -15,6 +14,18 @@ RUN apt-get update && apt-get install -y \
     libxss1 \
     libxtst6 \
     libxrandr2 \
+    libdbus-1-3 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libdrm2 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libgbm1 \
+    libxkbcommon0 \
+    libpango-1.0-0 \
+    libcairo2 \
+    libatspi2.0-0 \
     && apt-get clean
 
 # Cài đặt Node.js 18 và Yarn để sử dụng Playwright
@@ -22,32 +33,25 @@ RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs \
     && npm install --global yarn
 
-# Tạo thư mục ứng dụng cho Playwright và tạo file package.json (không cần mã nguồn Node.js)
 WORKDIR /app
 
-# Tạo một package.json trống
+# Tạo package.json cho Playwright
 RUN echo '{"name": "playwright-app", "version": "1.0.0", "devDependencies": {"playwright": "^1.24.0"}}' > package.json
 
-# Cài đặt Playwright mà không cần mã nguồn Node.js
+# Cài đặt Playwright
 RUN yarn install
 
-# Cài đặt Playwright
+# Cài đặt Playwright trình duyệt Chromium
 RUN yarn playwright install chromium
+
+# Nếu không cần cache, bỏ qua phần sao chép cache
+RUN yarn playwright install --force
 
 # Tạo thư mục để lưu trữ cache Playwright
 ENV PLAYWRIGHT_BROWSERS_PATH=/usr/local/share/playwright-browsers
 ENV XDG_CACHE_HOME=/root/.cache
 
-# Store/pull Playwright cache with build cache
-RUN if [ ! -d "$PLAYWRIGHT_BROWSERS_PATH" ]; then \
-      echo "...Copying Playwright Cache from Build Cache" && \
-      cp -R $XDG_CACHE_HOME/playwright/ $PLAYWRIGHT_BROWSERS_PATH; \
-    else \
-      echo "...Storing Playwright Cache in Build Cache" && \
-      cp -R $PLAYWRIGHT_BROWSERS_PATH $XDG_CACHE_HOME; \
-    fi
-
-# Cài đặt các thư viện Python cần thiết cho dự án của bạn
+# Cài đặt các thư viện Python cần thiết
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
