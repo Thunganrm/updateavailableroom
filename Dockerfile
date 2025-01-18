@@ -63,4 +63,4 @@ RUN playwright install
 EXPOSE 5000
 
 # Chạy ứng dụng Flask với Xvfb để hỗ trợ Playwright (headless)
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:5000", "--workers", "3", "--timeout", "120"]
+CMD ["gunicorn", "app:app", "--workers=5", "--timeout=600", "--bind=0.0.0.0:5000"]
