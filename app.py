@@ -24,7 +24,7 @@ async def update_data():
 
         try:
             # Mở trang web đăng nhập
-            page.goto("https://id.bluejaypms.com/login")
+            page.goto("https://id.bluejaypms.com/login",timeout=30000)
 
             # Chờ cho ngôn ngữ load xong và chọn ngôn ngữ
             page.wait_for_selector("select[name='ddlLangCode']", timeout=30000)
