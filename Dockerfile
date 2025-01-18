@@ -66,4 +66,4 @@ RUN pip install -r requirements.txt
 EXPOSE 5000
 
 # Lệnh để chạy ứng dụng của bạn
-CMD ["python", "main.py"]
+CMD ["python", "app.py"]
