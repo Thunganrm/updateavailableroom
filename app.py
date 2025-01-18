@@ -17,91 +17,98 @@ async def update_data():
     global result_df
     async def main():
         global hotel_responses, result_df
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
-            page = await browser.new_page()
-
+        browser = None
 
         try:
-            # Mở trang web đăng nhập
-            page.goto("https://id.bluejaypms.com/login",timeout=30000)
 
-            # Chờ cho ngôn ngữ load xong và chọn ngôn ngữ
-            page.wait_for_selector("select[name='ddlLangCode']", timeout=30000)
-            page.select_option("select[name='ddlLangCode']", "vi-VN")
-
-            # Điền thông tin đăng nhập
-            page.fill("input[name='txtEmail']", "ngan.lalahouse@gmail.com")
-            page.fill("input[name='txtPassword']", "Hotelhelper@2024")
-
-            # Nhấn nút đăng nhập
-            page.click("button#lkLogin")
-
-            # Chờ tải trang sau khi đăng nhập
-            page.wait_for_selector("a#lvHotels_lbtNameHotel_0", timeout=10000)
-
-            # Nhấn vào khách sạn đầu tiên
-            page.click("a#lvHotels_lbtNameHotel_0")
-
-            # Chờ tải trang khách sạn
-            page.wait_for_selector("div#hotel-detail", timeout=10000)
-
-            # Lấy cookies từ trang
-            cookies = await page.context.cookies()
-            keys_to_keep = [
-                "ASP.NET_SessionId", "HtLanguage", "HtToken", "HtHotelId", "HtBaseDir"
-            ]
-            filtered_cookies = [cookie for cookie in cookies if cookie['name'] in keys_to_keep]
-
-            # Danh sách khách sạn mới
-            new_ht_hotel_id_list = ["5998", "6001", "6062"]
-            hotel_responses = []
-            today = datetime.today()
-
-            # Định dạng ngày theo kiểu YYYY-MM-DD
-            from_date = today.strftime('%Y-%m-%d')
-            t = 30
-            # Tính ngày 10 ngày sau
-            to_date = today + timedelta(days=t)
-            to_date = to_date.strftime('%Y-%m-%d')
-
-            # Gửi yêu cầu với từng HtHotelId
-            for new_ht_hotel_id in new_ht_hotel_id_list:
-                for cookie in filtered_cookies:
-                    if cookie['name'] == 'HtHotelId':
-                        cookie['value'] = new_ht_hotel_id
-
-                cookie_header = "; ".join([f"{cookie['name']}={cookie['value']}" for cookie in filtered_cookies])
-
-                url = "https://id.bluejaypms.com/app/Room/GetRoomAvails"
-                headers = {
-                    "Accept": "*/*", "Accept-Encoding": "gzip, deflate, br, zstd", "Accept-Language": "en-US,en;q=0.9,vi;q=0.8",
-                    "Content-Type": "application/json; charset=UTF-8", "Referer": "https://id.bluejaypms.com/app/calendar",
-                    "Origin": "https://id.bluejaypms.com", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-                    "Cookie": cookie_header
-                }
-
-                data = [
-                    {"Action": "UpdateAvail", "RoomTypeId": "9197", "FromDate": from_date, "ToDate": to_date},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9198", "FromDate": from_date, "ToDate": to_date},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9199", "FromDate": from_date, "ToDate": to_date},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9207", "FromDate": from_date, "ToDate": to_date},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9208", "FromDate": from_date, "ToDate": to_date},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9206", "FromDate": from_date, "ToDate": to_date},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9555", "FromDate": from_date, "ToDate": to_date},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9556", "FromDate": from_date, "ToDate": to_date},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9557", "FromDate": from_date, "ToDate": to_date},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9558", "FromDate": from_date, "ToDate": to_date},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9559", "FromDate": from_date, "ToDate": to_date},
+            async with async_playwright() as p:
+                browser = await p.chromium.launch(headless=True)
+                page = await browser.new_page()
+        
+        
+                # Mở trang web đăng nhập
+                page.goto("https://id.bluejaypms.com/login",timeout=30000)
+        
+                # Chờ cho ngôn ngữ load xong và chọn ngôn ngữ
+                page.wait_for_selector("select[name='ddlLangCode']", timeout=30000)
+                page.select_option("select[name='ddlLangCode']", "vi-VN")
+        
+                # Điền thông tin đăng nhập
+                page.fill("input[name='txtEmail']", "ngan.lalahouse@gmail.com")
+                page.fill("input[name='txtPassword']", "Hotelhelper@2024")
+        
+                # Nhấn nút đăng nhập
+                page.click("button#lkLogin")
+        
+                # Chờ tải trang sau khi đăng nhập
+                page.wait_for_selector("a#lvHotels_lbtNameHotel_0", timeout=10000)
+        
+                # Nhấn vào khách sạn đầu tiên
+                page.click("a#lvHotels_lbtNameHotel_0")
+        
+                # Chờ tải trang khách sạn
+                page.wait_for_selector("div#hotel-detail", timeout=10000)
+        
+                # Lấy cookies từ trang
+                cookies = await page.context.cookies()
+                keys_to_keep = [
+                    "ASP.NET_SessionId", "HtLanguage", "HtToken", "HtHotelId", "HtBaseDir"
                 ]
+                filtered_cookies = [cookie for cookie in cookies if cookie['name'] in keys_to_keep]
+        
+                # Danh sách khách sạn mới
+                new_ht_hotel_id_list = ["5998", "6001", "6062"]
+                hotel_responses = []
+                today = datetime.today()
+        
+                # Định dạng ngày theo kiểu YYYY-MM-DD
+                from_date = today.strftime('%Y-%m-%d')
+                t = 30
+                # Tính ngày 10 ngày sau
+                to_date = today + timedelta(days=t)
+                to_date = to_date.strftime('%Y-%m-%d')
+        
+                # Gửi yêu cầu với từng HtHotelId
+                for new_ht_hotel_id in new_ht_hotel_id_list:
+                    for cookie in filtered_cookies:
+                        if cookie['name'] == 'HtHotelId':
+                            cookie['value'] = new_ht_hotel_id
+        
+                    cookie_header = "; ".join([f"{cookie['name']}={cookie['value']}" for cookie in filtered_cookies])
+        
+                    url = "https://id.bluejaypms.com/app/Room/GetRoomAvails"
+                    headers = {
+                        "Accept": "*/*", "Accept-Encoding": "gzip, deflate, br, zstd", "Accept-Language": "en-US,en;q=0.9,vi;q=0.8",
+                        "Content-Type": "application/json; charset=UTF-8", "Referer": "https://id.bluejaypms.com/app/calendar",
+                        "Origin": "https://id.bluejaypms.com", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+                        "Cookie": cookie_header
+                    }
+        
+                    data = [
+                        {"Action": "UpdateAvail", "RoomTypeId": "9197", "FromDate": from_date, "ToDate": to_date},
+                        {"Action": "UpdateAvail", "RoomTypeId": "9198", "FromDate": from_date, "ToDate": to_date},
+                        {"Action": "UpdateAvail", "RoomTypeId": "9199", "FromDate": from_date, "ToDate": to_date},
+                        {"Action": "UpdateAvail", "RoomTypeId": "9207", "FromDate": from_date, "ToDate": to_date},
+                        {"Action": "UpdateAvail", "RoomTypeId": "9208", "FromDate": from_date, "ToDate": to_date},
+                        {"Action": "UpdateAvail", "RoomTypeId": "9206", "FromDate": from_date, "ToDate": to_date},
+                        {"Action": "UpdateAvail", "RoomTypeId": "9555", "FromDate": from_date, "ToDate": to_date},
+                        {"Action": "UpdateAvail", "RoomTypeId": "9556", "FromDate": from_date, "ToDate": to_date},
+                        {"Action": "UpdateAvail", "RoomTypeId": "9557", "FromDate": from_date, "ToDate": to_date},
+                        {"Action": "UpdateAvail", "RoomTypeId": "9558", "FromDate": from_date, "ToDate": to_date},
+                        {"Action": "UpdateAvail", "RoomTypeId": "9559", "FromDate": from_date, "ToDate": to_date},
+                    ]
+        
+                    json_data = json.dumps(data)
+                    response = requests.post(url, headers=headers, data=json_data)
+                    if response.status_code == 200:
+                        hotel_responses.append(response.json())
 
-                json_data = json.dumps(data)
-                response = requests.post(url, headers=headers, data=json_data)
-                if response.status_code == 200:
-                    hotel_responses.append(response.json())
-
+        except Exception as e:
+            print(f"Error: {e}")
         finally:
-            await browser.close()
+            # Đảm bảo đóng trình duyệt trong phần `finally` để tránh trường hợp không đóng
+            if browser:
+                await browser.close()
 
 
         bt = list(itertools.chain.from_iterable(hotel_responses))
