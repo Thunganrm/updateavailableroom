@@ -54,6 +54,7 @@ ENV XDG_CACHE_HOME=/root/.cache
 # Cài đặt các thư viện Python cần thiết
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+RUN yarn playwright install-deps
 
 # Sao chép mã nguồn vào container
 COPY . /app
