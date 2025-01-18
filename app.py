@@ -23,7 +23,7 @@ async def update_data():
 
             print('da den trang dang nhap')
             
-            await page.goto("https://id.bluejaypms.com/login", timeout=10000)
+            await page.goto("https://id.bluejaypms.com/login", timeout=30000)
             await page.wait_for_load_state("load")  # Wait for page to be fully loaded
 
             await page.select_option("select[name='ddlLangCode']", "vi-VN")
