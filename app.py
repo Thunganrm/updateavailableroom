@@ -7,7 +7,7 @@ from playwright.async_api import async_playwright
 import itertools
 from flask import Flask, jsonify, send_file, render_template
 import polars as pl
-
+import playwight
 
 app = Flask(__name__)
 
