@@ -17,8 +17,8 @@ RUN apt-get update && apt-get install -y \
     libxrandr2 \
     && apt-get clean
 
-# Cài đặt Node.js và Yarn để sử dụng Playwright
-RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - \
+# Cài đặt Node.js 18 và Yarn để sử dụng Playwright
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs \
     && npm install --global yarn
 
