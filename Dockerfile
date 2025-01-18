@@ -66,7 +66,7 @@ RUN playwright install
 
 
 # Lệnh để kiểm tra và sao lưu cache của Playwright
-R10000
+EXPOSE 10000
 
 # Chạy ứng dụng Flask với Xvfb để hỗ trợ Playwright (headless)
 CMD xvfb-run -a python app.py
