@@ -26,47 +26,41 @@ RUN apt-get update && apt-get install -y \
     libpango-1.0-0 \
     libcairo2 \
     libatspi2.0-0 \
+    dbus \
     && apt-get clean
 
-# Cài đặt Node.js 18 và Yarn để sử dụng Playwright
+# Cài đặt Node.js 18 và Yarn
 RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs \
     && npm install --global yarn
 
 WORKDIR /app
 
-# Tạo package.json cho Playwright
+# Tạo package.json cho Playwright và cài đặt Playwright
 RUN echo '{"name": "playwright-app", "version": "1.0.0", "devDependencies": {"playwright": "^1.24.0"}}' > package.json
 RUN yarn install
 
-# Cài đặt Playwright
+# Cài đặt Playwright và các trình duyệt Chromium
 RUN yarn playwright install
 
 # Cài đặt Playwright trình duyệt Chromium
 RUN yarn playwright install chromium
 
-# Nếu không cần cache, bỏ qua phần sao chép cache
-
-# Tạo thư mục để lưu trữ cache Playwright
-ENV PLAYWRIGHT_BROWSERS_PATH=/usr/local/share/playwright-browsers
-ENV XDG_CACHE_HOME=/root/.cache
-
 # Cài đặt các thư viện Python cần thiết
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Cài đặt các phụ thuộc của Playwright (các thư viện hệ thống cần thiết)
 RUN yarn playwright install-deps
-RUN apt-get update && apt-get install -y dbus
-RUN playwright install 
 
 # Sao chép mã nguồn vào container
 COPY . /app
-WORKDIR /app
 
-# Cài đặt thư viện yêu cầu
+# Chạy các bước cài đặt thư viện Python yêu cầu
 RUN pip install -r requirements.txt
 
 # Mở cổng cho ứng dụng Flask
-EXPOSE 5000
+EXPOSE 10000
 
 # Lệnh để chạy ứng dụng của bạn
 CMD ["python", "app.py"]
