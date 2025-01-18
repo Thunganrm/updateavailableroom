@@ -21,54 +21,58 @@ async def update_data():
             browser = await p.chromium.launch(headless=True)
             page = await browser.new_page()
 
-            print('da den trang dang nhap')
-            
-            await page.goto("https://id.bluejaypms.com/login", timeout=30000)
-            await page.wait_for_load_state("load")  # Wait for page to be fully loaded
 
-            await page.select_option("select[name='ddlLangCode']", "vi-VN")
-            await page.fill("input[name='txtEmail']", "ngan.lalahouse@gmail.com")
-            await page.fill("input[name='txtPassword']", "Hotelhelper@2024")
-            await page.click("a#lkLogin")
-            await page.wait_for_load_state("load")  # Wait for page to be fully loaded
+        try:
+            # Mở trang web đăng nhập
+            page.goto("https://id.bluejaypms.com/login")
 
+            # Chờ cho ngôn ngữ load xong và chọn ngôn ngữ
+            page.wait_for_selector("select[name='ddlLangCode']", timeout=30000)
+            page.select_option("select[name='ddlLangCode']", "vi-VN")
 
-            print('da dang nhap')
+            # Điền thông tin đăng nhập
+            page.fill("input[name='txtEmail']", "ngan.lalahouse@gmail.com")
+            page.fill("input[name='txtPassword']", "Hotelhelper@2024")
 
-            await page.wait_for_selector("#lvHotels_lbtNameHotel_0")
-            await page.click("#lvHotels_lbtNameHotel_0")
+            # Nhấn nút đăng nhập
+            page.click("button#lkLogin")
 
+            # Chờ tải trang sau khi đăng nhập
+            page.wait_for_selector("a#lvHotels_lbtNameHotel_0", timeout=30000)
 
-            await page.wait_for_timeout(5000)
-            await page.wait_for_load_state("load")
+            # Nhấn vào khách sạn đầu tiên
+            page.click("a#lvHotels_lbtNameHotel_0")
 
-            cookies = await page.context.cookies()
+            # Chờ tải trang khách sạn
+            page.wait_for_selector("div#hotel-detail", timeout=30000)
+
+            # Lấy cookies từ trang
+            cookies = page.context.cookies()
+            print(cookies)
             keys_to_keep = [
                 "ASP.NET_SessionId", "HtLanguage", "HtToken", "HtHotelId", "HtBaseDir"
             ]
             filtered_cookies = [cookie for cookie in cookies if cookie['name'] in keys_to_keep]
 
-
+            # Danh sách khách sạn mới
             new_ht_hotel_id_list = ["5998", "6001", "6062"]
             hotel_responses = []
             today = datetime.today()
 
-
             # Định dạng ngày theo kiểu YYYY-MM-DD
             from_date = today.strftime('%Y-%m-%d')
-            t=30
+            t = 30
             # Tính ngày 10 ngày sau
             to_date = today + timedelta(days=t)
             to_date = to_date.strftime('%Y-%m-%d')
-            for new_ht_hotel_id in new_ht_hotel_id_list:
-                for i, cookie in enumerate(filtered_cookies):
-                    if cookie['name'] == 'HtHotelId':
-                        filtered_cookies[i]['value'] = new_ht_hotel_id
-                        break
 
+            # Gửi yêu cầu với từng HtHotelId
+            for new_ht_hotel_id in new_ht_hotel_id_list:
+                for cookie in filtered_cookies:
+                    if cookie['name'] == 'HtHotelId':
+                        cookie['value'] = new_ht_hotel_id
 
                 cookie_header = "; ".join([f"{cookie['name']}={cookie['value']}" for cookie in filtered_cookies])
-
 
                 url = "https://id.bluejaypms.com/app/Room/GetRoomAvails"
                 headers = {
@@ -77,7 +81,6 @@ async def update_data():
                     "Origin": "https://id.bluejaypms.com", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
                     "Cookie": cookie_header
                 }
-
 
                 data = [
                     {"Action": "UpdateAvail", "RoomTypeId": "9197", "FromDate": from_date, "ToDate": to_date},
@@ -93,16 +96,13 @@ async def update_data():
                     {"Action": "UpdateAvail", "RoomTypeId": "9559", "FromDate": from_date, "ToDate": to_date},
                 ]
 
-
-
-
                 json_data = json.dumps(data)
                 response = requests.post(url, headers=headers, data=json_data)
                 if response.status_code == 200:
                     hotel_responses.append(response.json())
 
-
-            await browser.close()
+        finally:
+            browser.close()
 
 
         bt = list(itertools.chain.from_iterable(hotel_responses))
