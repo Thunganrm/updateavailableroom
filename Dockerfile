@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install -y \
     libcairo2 \
     libatspi2.0-0 \
     dbus \
+    xvfb \
     xauth \
     && apt-get clean
 
