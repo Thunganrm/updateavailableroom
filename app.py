@@ -1,3 +1,4 @@
+import os
 
 import asyncio
 import json
@@ -181,5 +182,6 @@ def run_update_data():
     return render_template('index.html', resultList=resultList)
 if __name__ == "__main__":
   # Nếu không có PORT thì dùng cổng mặc định 5000
+    port = int(os.environ.get("PORT", 5000))  # Sử dụng PORT từ biến môi trường hoặc mặc định 5000
 
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=port,debug=True)
