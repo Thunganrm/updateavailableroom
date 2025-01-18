@@ -22,6 +22,15 @@ RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - \
     && apt-get install -y nodejs \
     && npm install --global yarn
 
+# Tạo thư mục ứng dụng cho Playwright và tạo file package.json (không cần mã nguồn Node.js)
+WORKDIR /app
+
+# Tạo một package.json trống
+RUN echo '{"name": "playwright-app", "version": "1.0.0", "devDependencies": {"playwright": "^1.24.0"}}' > package.json
+
+# Cài đặt Playwright mà không cần mã nguồn Node.js
+RUN yarn install
+
 # Cài đặt Playwright
 RUN yarn playwright install chromium
 
