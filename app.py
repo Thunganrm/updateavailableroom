@@ -27,27 +27,27 @@ async def update_data():
         
         
                 # Mở trang web đăng nhập
-                page.goto("https://id.bluejaypms.com/login",timeout=30000)
+                await page.goto("https://id.bluejaypms.com/login",timeout=30000)
         
                 # Chờ cho ngôn ngữ load xong và chọn ngôn ngữ
-                page.wait_for_selector("select[name='ddlLangCode']", timeout=30000)
-                page.select_option("select[name='ddlLangCode']", "vi-VN")
+                await page.wait_for_selector("select[name='ddlLangCode']", timeout=30000)
+                await page.select_option("select[name='ddlLangCode']", "vi-VN")
         
                 # Điền thông tin đăng nhập
-                page.fill("input[name='txtEmail']", "ngan.lalahouse@gmail.com")
-                page.fill("input[name='txtPassword']", "Hotelhelper@2024")
+                await page.fill("input[name='txtEmail']", "ngan.lalahouse@gmail.com")
+                await page.fill("input[name='txtPassword']", "Hotelhelper@2024")
         
                 # Nhấn nút đăng nhập
-                page.click("button#lkLogin")
+                await page.click("button#lkLogin")
         
                 # Chờ tải trang sau khi đăng nhập
-                page.wait_for_selector("a#lvHotels_lbtNameHotel_0", timeout=10000)
+                await page.wait_for_selector("a#lvHotels_lbtNameHotel_0", timeout=10000)
         
                 # Nhấn vào khách sạn đầu tiên
-                page.click("a#lvHotels_lbtNameHotel_0")
+                await page.click("a#lvHotels_lbtNameHotel_0")
         
                 # Chờ tải trang khách sạn
-                page.wait_for_selector("div#hotel-detail", timeout=10000)
+                await page.wait_for_selector("div#hotel-detail", timeout=10000)
         
                 # Lấy cookies từ trang
                 cookies = await page.context.cookies()
