@@ -50,7 +50,7 @@ RUN yarn playwright install chromium
 
 # Cài đặt các thư viện Python cần thiết
 COPY requirements.txt .
-RUN pip playwright install
+RUN playwright install
 EXPOSE 5000
 
 # Chạy ứng dụng Flask với Xvfb để hỗ trợ Playwright (headless)
