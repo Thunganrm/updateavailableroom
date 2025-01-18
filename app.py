@@ -12,7 +12,7 @@ app = Flask(__name__)
 
 # Hàm cập nhật dữ liệu
 
-
+hotel_responses=[]
 async def update_data():
     global result_df
     async def main():
