@@ -22,16 +22,8 @@ async def update_data():
             page = await browser.new_page()
 
             print('da den trang dang nhap')
-            try:
-                await page.goto("https://id.bluejaypms.com/login", timeout=60000)
-            except playwright._impl._errors.TimeoutError as e:
-                # Handle timeout error, maybe retry or log it
-                print(f"Timeout error: {str(e)}")
-                return "Timeout error occurred", 500
-            except playwright._impl._errors.Error as e:
-                # Handle other errors
-                print(f"Playwright error: {str(e)}")
-                return "Playwright error occurred", 500
+            
+            await page.goto("https://id.bluejaypms.com/login", timeout=10000)
             await page.wait_for_load_state("load")  # Wait for page to be fully loaded
 
             await page.select_option("select[name='ddlLangCode']", "vi-VN")
@@ -40,14 +32,15 @@ async def update_data():
             await page.click("a#lkLogin")
             await page.wait_for_load_state("load")  # Wait for page to be fully loaded
 
-            await page.wait_for_timeout(5000)
 
             print('da dang nhap')
 
             await page.wait_for_selector("#lvHotels_lbtNameHotel_0")
             await page.click("#lvHotels_lbtNameHotel_0")
-            await page.wait_for_timeout(5000)
 
+
+            await page.wait_for_timeout(5000)
+            await page.wait_for_load_state("load")
 
             cookies = await page.context.cookies()
             keys_to_keep = [
