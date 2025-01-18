@@ -42,7 +42,11 @@ async def update_data():
                 "ASP.NET_SessionId", "HtLanguage", "HtToken", "HtHotelId", "HtBaseDir"
             ]
             filtered_cookies = [cookie for cookie in cookies if cookie['name'] in keys_to_keep]
-
+            from_date = today.strftime('%Y-%m-%d')
+            t=30
+            # Tính ngày 10 ngày sau
+            to_date = today + timedelta(days=t)
+            to_date = to_date.strftime('%Y-%m-%d')
             # Thay đổi giá trị của HtHotelId
             new_ht_hotel_id_list = ["5998", "6001", "6062"]
             hotel_responses = []
@@ -63,19 +67,28 @@ async def update_data():
                     "Origin": "https://id.bluejaypms.com", "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
                     "Cookie": cookie_header
                 }
+                today = datetime.today()
+    
+    
+                # Định dạng ngày theo kiểu YYYY-MM-DD
+                from_date = today.strftime('%Y-%m-%d')
+                t=30
+                # Tính ngày 10 ngày sau
+                to_date = today + timedelta(days=t)
+                to_date = to_date.strftime('%Y-%m-%d')
 
                 data = [
-                    {"Action": "UpdateAvail", "RoomTypeId": "9197", "FromDate": "2024-12-02", "ToDate": "2024-12-05"},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9198", "FromDate": "2024-12-02", "ToDate": "2024-12-05"},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9199", "FromDate": "2024-12-02", "ToDate": "2024-12-05"},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9207", "FromDate": "2024-12-02", "ToDate": "2024-12-05"},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9208", "FromDate": "2024-12-02", "ToDate": "2024-12-05"},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9206", "FromDate": "2024-12-02", "ToDate": "2024-12-05"},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9555", "FromDate": "2024-12-02", "ToDate": "2024-12-05"},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9556", "FromDate": "2024-12-02", "ToDate": "2024-12-05"},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9557", "FromDate": "2024-12-02", "ToDate": "2024-12-05"},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9558", "FromDate": "2024-12-02", "ToDate": "2024-12-05"},
-                    {"Action": "UpdateAvail", "RoomTypeId": "9559", "FromDate": "2024-12-02", "ToDate": "2024-12-05"},
+                    {"Action": "UpdateAvail", "RoomTypeId": "9197", "FromDate": from_date, "ToDate": to_date},
+                    {"Action": "UpdateAvail", "RoomTypeId": "9198", "FromDate": from_date, "ToDate": to_date},
+                    {"Action": "UpdateAvail", "RoomTypeId": "9199", "FromDate": from_date, "ToDate": to_date},
+                    {"Action": "UpdateAvail", "RoomTypeId": "9207", "FromDate": from_date, "ToDate": to_date},
+                    {"Action": "UpdateAvail", "RoomTypeId": "9208", "FromDate": from_date, "ToDate": to_date},
+                    {"Action": "UpdateAvail", "RoomTypeId": "9206", "FromDate": from_date, "ToDate": to_date},
+                    {"Action": "UpdateAvail", "RoomTypeId": "9555", "FromDate": from_date, "ToDate": to_date},
+                    {"Action": "UpdateAvail", "RoomTypeId": "9556", "FromDate": from_date, "ToDate": to_date},
+                    {"Action": "UpdateAvail", "RoomTypeId": "9557", "FromDate": from_date, "ToDate": to_date},
+                    {"Action": "UpdateAvail", "RoomTypeId": "9558", "FromDate": from_date, "ToDate": to_date},
+                    {"Action": "UpdateAvail", "RoomTypeId": "9559", "FromDate": from_date, "ToDate": to_date},
                 ]
 
                 json_data = json.dumps(data)
@@ -122,7 +135,7 @@ async def update_data():
         df['SellTo'] = df['SellTo'].apply(lambda x: datetime.strptime(x.replace('T', ' ').split('.')[0], '%Y-%m-%d %H:%M:%S'))
 
         start_date = datetime.today()
-        end_date = start_date + timedelta(days=6)
+        end_date = start_date + timedelta(days=30)
         date_range = pd.date_range(start=start_date, end=end_date).strftime('%Y-%m-%d').tolist()
 
         result = []
