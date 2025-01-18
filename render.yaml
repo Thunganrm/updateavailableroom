@@ -37,7 +37,7 @@ services:
     env: python
     buildCommand: pip install -r requirements.txt
     startCommand: "python app.py"
-    port: 10000  # Hoặc sử dụng PORT từ môi trường
+    port: 5000  # Hoặc sử dụng PORT từ môi trường
 
     autoDeploy: true
     scaling:
