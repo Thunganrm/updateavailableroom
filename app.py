@@ -159,11 +159,11 @@ async def update_data():
 
         if "SellFrom" in df.columns:
 
-        df = df.with_columns([
-            pl.col("SellFrom").str.to_datetime().cast(pl.Date).alias("SellFrom"),  # Cập nhật cột SellFrom
-            pl.col("SellTo").str.to_datetime().cast(pl.Date).alias("SellTo"),
-            pl.col("RoomType_Id").cast(pl.Utf8),
-            pl.col("HotelId").cast(pl.Utf8)])
+            df = df.with_columns([
+                pl.col("SellFrom").str.to_datetime().cast(pl.Date).alias("SellFrom"),  # Cập nhật cột SellFrom
+                pl.col("SellTo").str.to_datetime().cast(pl.Date).alias("SellTo"),
+                pl.col("RoomType_Id").cast(pl.Utf8),
+                pl.col("HotelId").cast(pl.Utf8)])
             
         else:
             print("SellFrom column is missing!")
