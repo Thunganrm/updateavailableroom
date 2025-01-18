@@ -18,7 +18,7 @@ async def update_data():
     async def main():
         global hotel_responses,result_df
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
+            browser = await p.chromium.launch(headless=TrueTrue,args=["--no-sandbox", "--disable-setuid-sandbox"])
   # Chế độ headless
             page = await browser.new_page()
 
