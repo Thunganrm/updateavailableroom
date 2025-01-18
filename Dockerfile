@@ -62,18 +62,17 @@ RUN pip install -r requirements.txt
 
 RUN playwright install
 
-# Store/pull Playwright cache with build cache
-if [[ ! -d $PLAYWRIGHT_BROWSERS_PATH ]]; then 
-  echo "...Copying Playwright Cache from Build Cache" 
-  cp -R $XDG_CACHE_HOME/playwright/ $PLAYWRIGHT_BROWSERS_PATH
-else 
-  echo "...Storing Playwright Cache in Build Cache" 
-  cp -R $PLAYWRIGHT_BROWSERS_PATH $XDG_CACHE_HOME
-fi
+# Lệnh để kiểm tra và sao lưu cache của Playwright
+RUN if [ ! -d "$PLAYWRIGHT_BROWSERS_PATH" ]; then \
+    echo "...Copying Playwright Cache from Build Cache"; \
+    cp -R $XDG_CACHE_HOME/playwright/ $PLAYWRIGHT_BROWSERS_PATH; \
+    else \
+    echo "...Storing Playwright Cache in Build Cache"; \
+    cp -R $PLAYWRIGHT_BROWSERS_PATH $XDG_CACHE_HOME; \
+    fi
 
-xvfb-run app.py
 # Mở cổng cho ứng dụng Flask
-EXPOSE 10000
+EXPOSE 5000
 
-# Lệnh để chạy ứng dụng của bạn
-CMD ["python", "app.py"]
+# Chạy ứng dụng Flask với Xvfb để hỗ trợ Playwright (headless)
+CMD xvfb-run -a python app.py
