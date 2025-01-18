@@ -47,6 +47,7 @@ RUN yarn playwright install
 
 # Cài đặt Playwright trình duyệt Chromium
 RUN yarn playwright install chromium
+RUN pip install gunicorn
 
 # Cài đặt các thư viện Python cần thiết
 COPY requirements.txt .
@@ -62,4 +63,4 @@ RUN playwright install
 EXPOSE 5000
 
 # Chạy ứng dụng Flask với Xvfb để hỗ trợ Playwright (headless)
-CMD xvfb-run -a python app.py
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
